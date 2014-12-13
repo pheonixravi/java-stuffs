@@ -1,0 +1,89 @@
+package com.mmc.ravi.threadex;
+import java.util.*;
+
+class randomnumber{
+	int randomnumber=0;
+	boolean check=false;
+	synchronized public void getRandomNumber() throws InterruptedException
+	{
+		if(check)
+			wait();
+		
+		check=true;
+		notify();
+		 Random rand = new Random();
+		 randomnumber=rand.nextInt(10);
+		System.out.println("number : "+randomnumber);
+		
+	}
+	synchronized public void factorial() throws InterruptedException{
+		int fact=1;
+		if(!check)
+			wait();
+		
+		while(randomnumber>0)
+		{
+			fact= fact*randomnumber;
+			randomnumber--;
+		}
+		System.out.println("the factorial is"+fact);
+		
+		randomnumber=0;
+		fact=1;
+		check=false;
+		notify();
+	}
+}
+
+class Randomnum implements Runnable{
+	Thread t;
+	randomnumber rm;
+	public Randomnum(randomnumber rm){
+		t=new Thread(this);
+		this.rm=rm;
+		t.start();	       	
+	}
+	public void run(){
+		for(int i=0;i<5;i++)
+		{
+			try {
+				rm.getRandomNumber();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
+}
+class Generation implements Runnable{
+	Thread t;
+	randomnumber rm;
+	public Generation( randomnumber rm){
+		t=new Thread(this);
+		this.rm=rm;
+		t.start();	       	
+	}
+	public void run(){
+		for(int i=0;i<5;i++)
+		{
+			try {
+				rm.factorial();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+	}
+}
+
+
+
+public class Exercise07 {
+  public static void main(String args[]) throws InterruptedException{
+	  randomnumber rm=new randomnumber();
+	  new Randomnum(rm).t.setPriority(Thread.MAX_PRIORITY);
+	  new Generation(rm);
+  }
+}
